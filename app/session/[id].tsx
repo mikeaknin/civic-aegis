@@ -30,6 +30,7 @@ import {
 
 import { getStopSessionById, StopSession } from '../../services/storage';
 import { LawyerRecommendationPayload } from '../../services/aiService';
+import { AudioPlayer } from '../../components/AudioPlayer';
 
 export default function SessionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -99,7 +100,7 @@ export default function SessionDetailScreen() {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const durationSeconds = Math.max(1, Math.round((session.endTime - session.startTime) / 1000));
+  const durationSeconds = session.audioDuration || Math.max(1, Math.round((session.endTime - session.startTime) / 1000));
 
   const generateMarkdownBrief = () => {
     return `# CIVIC AEGIS ROADWAY INCIDENT BRIEF
@@ -234,6 +235,13 @@ ${session.transcript}
             </View>
           </View>
         </View>
+
+        {/* Real Audio Player in Incident Brief */}
+        <AudioPlayer
+          audioUri={session.audioUri}
+          durationSeconds={durationSeconds}
+          label={session.audioUri ? 'Roadside Stop Voice Audio' : 'Audio Encounter Log'}
+        />
 
         {/* Lawyer Recommendation Matrix */}
         <View style={styles.lawyerCard}>
@@ -453,7 +461,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2F1517',
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   summaryTopRow: {
     flexDirection: 'row',

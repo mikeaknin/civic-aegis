@@ -26,9 +26,12 @@ import {
   Hand,
   Info,
   Radio,
+  Sparkles,
 } from 'lucide-react-native';
 
 import { useSpeechToText, TranscriptEntry } from '../../hooks/useSpeechToText';
+import { useAudioRecorder } from '../../hooks/useAudioRecorder';
+import { vocalCoach } from '../../services/speechSynthesis';
 import {
   analyzeLiveTranscript,
   generateComprehensiveIncidentReport,
@@ -113,6 +116,7 @@ export default function MonitorScreen() {
   const [isSynthesizing, setIsSynthesizing] = useState<boolean>(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const { startRecording, stopRecording, recordingDuration } = useAudioRecorder();
 
   // Load telemetry stats, preferences, and check active unfinalized checkpoint
   useEffect(() => {
@@ -142,6 +146,15 @@ export default function MonitorScreen() {
     // Call Hybrid Gemini API Bridge with zero-latency offline fallback
     analyzeLiveTranscript(fullText, jurisdictionCode, geminiApiKey).then((analysis) => {
       setCurrentAnalysis(analysis);
+
+      // Trigger real-time vocal coach TTS through speaker
+      if (voiceReadout && analysis.suggestedResponse) {
+        vocalCoach.speak(analysis.suggestedResponse, {
+          enabled: voiceReadout,
+          lang: language,
+          prefixCoaching: true,
+        });
+      }
 
       // Real-time Local Storage Persistence on every audio/speech event
       const activeId = sessionId || `stop_${Date.now()}`;
@@ -186,6 +199,9 @@ export default function MonitorScreen() {
     const nextVal = !voiceReadout;
     setVoiceReadout(nextVal);
     saveUserSettings({ voiceReadout: nextVal });
+    if (!nextVal) {
+      vocalCoach.stop();
+    }
   };
 
   const handleJurisdictionSelect = (item: (typeof JURISDICTIONS)[0]) => {
@@ -223,20 +239,35 @@ export default function MonitorScreen() {
       locationLabel: `${selectedJurisdiction} Roadside Encounter`,
     });
 
+    // Start both real speech recognition and microphone audio recorder
     await startListening();
+    await startRecording();
+
+    if (voiceReadout) {
+      vocalCoach.speak('Civic Aegis active. Monitoring audio and protecting your rights.', {
+        enabled: voiceReadout,
+        lang: language,
+      });
+    }
   };
 
   const handleStopShield = async () => {
     if (!sessionId && transcriptEntries.length === 0) {
       await stopListening();
+      await stopRecording();
+      vocalCoach.stop();
       await clearActiveSessionCheckpoint();
       return;
     }
 
     setIsSynthesizing(true);
+    vocalCoach.stop();
     await stopListening();
+    const { audioUri, duration } = await stopRecording();
 
-    const fullTranscript = transcriptEntries.map((e) => `[${e.speaker === 'officer' ? 'Officer' : 'Driver'}]: ${e.text}`).join('\n');
+    const fullTranscript = transcriptEntries
+      .map((e) => `[${e.speaker === 'officer' ? 'Officer' : 'Driver'}]: ${e.text}`)
+      .join('\n');
     const start = stopStartTime || Date.now() - 60000;
     const end = Date.now();
 
@@ -259,6 +290,8 @@ export default function MonitorScreen() {
         latestAnalysis: currentAnalysis || undefined,
         finalReport,
         locationLabel: `${selectedJurisdiction} Roadside Encounter`,
+        audioUri: audioUri || undefined,
+        audioDuration: duration || Math.max(1, Math.round((end - start) / 1000)),
       };
 
       await saveStopSession(savedSession);
@@ -337,7 +370,7 @@ export default function MonitorScreen() {
                   isListening ? { color: '#EF4444' } : { color: '#10B981' },
                 ]}
               >
-                {isListening ? 'LISTENING (MIC ACTIVE)' : 'READY'}
+                {isListening ? `RECORDING (${recordingDuration}s)` : 'READY'}
               </Text>
             </View>
           </View>
@@ -378,8 +411,8 @@ export default function MonitorScreen() {
               </Text>
               <Text style={styles.pulledOverSubtitle}>
                 {isListening
-                  ? 'Tap to finalize, analyze risk, and save incident brief'
-                  : 'Instantly start listening, show calm safety reminders, and save a stop report'}
+                  ? 'Tap to finalize audio recording, evaluate risk, and save defense brief'
+                  : 'Instantly start microphone recording, speech recognition, and vocal coaching'}
               </Text>
             </View>
           </View>
@@ -416,8 +449,7 @@ export default function MonitorScreen() {
             })}
           </ScrollView>
           <Text style={styles.jurisdictionSubtext}>
-            Officer phrase detection stays English. Civic Aegis can coach and read responses in
-            Spanish.
+            Officer phrase detection stays English. Civic Aegis coaches and reads responses aloud.
           </Text>
         </View>
 
@@ -432,12 +464,12 @@ export default function MonitorScreen() {
               </Text>
             </View>
 
-            {/* Real-time Rights Speech Prompter */}
+            {/* Real-time Rights Speech Prompter & Vocal Coach Card */}
             <View style={styles.rightsPrompterCard}>
               <View style={styles.prompterHeader}>
                 <View style={styles.prompterHeaderLeft}>
                   <Volume2 size={16} color="#EF4444" />
-                  <Text style={styles.prompterLabel}>SAY CALMLY TO OFFICER:</Text>
+                  <Text style={styles.prompterLabel}>SAY THIS TO THE OFFICER:</Text>
                 </View>
                 <View
                   style={[
@@ -464,10 +496,19 @@ export default function MonitorScreen() {
                 </View>
               </View>
 
-              <Text style={styles.prompterSpeechText}>
-                "{currentAnalysis?.suggestedResponse ||
-                  'Good day, Officer. How can I help you today?'}"
-              </Text>
+              {/* Highlighted Driver Response Script */}
+              <View style={styles.prompterSpeechHighlightBox}>
+                <Text style={styles.prompterSpeechText}>
+                  "{currentAnalysis?.suggestedResponse ||
+                    'Good day, Officer. How can I help you today?'}"
+                </Text>
+                {voiceReadout && (
+                  <View style={styles.vocalCoachIndicator}>
+                    <Sparkles size={13} color="#EF4444" />
+                    <Text style={styles.vocalCoachIndicatorText}>Vocal coaching active through speaker</Text>
+                  </View>
+                )}
+              </View>
 
               {currentAnalysis && (
                 <View style={styles.analysisDetailBox}>
@@ -491,7 +532,7 @@ export default function MonitorScreen() {
               <View style={styles.transcriptCardHeader}>
                 <View style={styles.transcriptHeaderLeft}>
                   <Radio size={16} color="#EF4444" />
-                  <Text style={styles.transcriptCardTitle}>Live Audio Transcript (Continuous Mic)</Text>
+                  <Text style={styles.transcriptCardTitle}>Live Audio Transcript & Recorder</Text>
                 </View>
                 <Text style={styles.transcriptCount}>
                   {transcriptEntries.length} {transcriptEntries.length === 1 ? 'phrase' : 'phrases'}
@@ -507,7 +548,7 @@ export default function MonitorScreen() {
               >
                 {transcriptEntries.length === 0 && !interimTranscript ? (
                   <Text style={styles.emptyTranscriptText}>
-                    🎙️ Microphone active: speak naturally or tap a scenario trigger below...
+                    🎙️ Microphone recording active: speak naturally or tap a scenario trigger below...
                   </Text>
                 ) : (
                   <>
@@ -593,8 +634,8 @@ export default function MonitorScreen() {
           </Text>
           <Text style={styles.circularActionSubtitle}>
             {isListening
-              ? 'Tap to save evidence and generate defense brief'
-              : 'Listen + guide in real time'}
+              ? `Recording active (${recordingDuration}s) • Tap to save audio & brief`
+              : 'Record audio + live rights guidance'}
           </Text>
         </View>
 
@@ -616,17 +657,17 @@ export default function MonitorScreen() {
               <Mic size={18} color="#EF4444" />
             </View>
             <Text style={styles.howItemText}>
-              <Text style={styles.boldWhite}>Start Civic Aegis</Text> listens in real time and saves a
-              clean stop report
+              <Text style={styles.boldWhite}>Start Civic Aegis</Text> records microphone audio and
+              transcribes dialogue in real time
             </Text>
           </View>
 
           <View style={styles.howItemRow}>
             <View style={styles.howItemIconBox}>
-              <Globe size={18} color="#EF4444" />
+              <Volume2 size={18} color="#EF4444" />
             </View>
             <Text style={styles.howItemText}>
-              Switch coaching and voice readout between English and Spanish
+              Vocal coaching speaks out recommended constitutional responses through your speaker
             </Text>
           </View>
 
@@ -635,8 +676,8 @@ export default function MonitorScreen() {
               <Briefcase size={18} color="#EF4444" />
             </View>
             <Text style={styles.howItemText}>
-              <Text style={styles.boldWhite}>History</Text> analyzes if you should consult a lawyer
-              and lawyer specialty
+              <Text style={styles.boldWhite}>History</Text> plays back recorded audio and analyzes if
+              you should consult legal counsel
             </Text>
           </View>
 
@@ -652,8 +693,8 @@ export default function MonitorScreen() {
           <View style={styles.howFooterNote}>
             <Text style={styles.howFooterText}>
               {voiceReadout
-                ? '🔊 Voice readout is currently ON. Toggle with the speaker icon above.'
-                : '🔇 Voice readout is currently MUTED. Tap speaker icon to enable audio prompts.'}
+                ? '🔊 Vocal coach is currently ON. Recommended phrases will be spoken aloud.'
+                : '🔇 Vocal coach is currently MUTED. Tap speaker icon to enable audio prompts.'}
             </Text>
           </View>
         </View>
@@ -953,7 +994,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   prompterLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '900',
     color: '#EF4444',
     marginLeft: 6,
@@ -981,12 +1022,33 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
   },
-  prompterSpeechText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    lineHeight: 25,
+  prompterSpeechHighlightBox: {
+    backgroundColor: '#1E0A0D',
+    borderRadius: 10,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#EF4444',
     marginBottom: 12,
+  },
+  prompterSpeechText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    lineHeight: 26,
+  },
+  vocalCoachIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  vocalCoachIndicatorText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#EF4444',
+    marginLeft: 6,
   },
   analysisDetailBox: {
     backgroundColor: '#080808',

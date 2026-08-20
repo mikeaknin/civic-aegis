@@ -22,8 +22,6 @@ import {
   Scale,
   Calendar,
   Share2,
-  Play,
-  Square,
   Check,
 } from 'lucide-react-native';
 
@@ -33,13 +31,13 @@ import {
   clearAllStopSessions,
   StopSession,
 } from '../../services/storage';
+import { AudioPlayer } from '../../components/AudioPlayer';
 
 export default function HistoryScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [sessions, setSessions] = useState<StopSession[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [playingSessionId, setPlayingSessionId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const loadSessions = useCallback(async () => {
@@ -54,14 +52,6 @@ export default function HistoryScreen() {
       loadSessions();
     }, [loadSessions])
   );
-
-  const toggleAudioSimulation = (id: string) => {
-    if (playingSessionId === id) {
-      setPlayingSessionId(null);
-    } else {
-      setPlayingSessionId(id);
-    }
-  };
 
   const handleExportShare = async (item: StopSession) => {
     const dateStr = new Date(item.startTime).toLocaleDateString();
@@ -150,7 +140,6 @@ Generated autonomously by Civic Aegis.`;
   const renderSessionItem = ({ item }: { item: StopSession }) => {
     const risk = getRiskColor(item.maxRiskLevel);
     const RiskIcon = risk.Icon;
-    const isPlaying = playingSessionId === item.id;
     const isCopied = copiedId === item.id;
 
     const dateStr = new Date(item.startTime).toLocaleDateString([], {
@@ -162,7 +151,7 @@ Generated autonomously by Civic Aegis.`;
       hour: '2-digit',
       minute: '2-digit',
     });
-    const durationSeconds = Math.max(1, Math.round((item.endTime - item.startTime) / 1000));
+    const durationSeconds = item.audioDuration || Math.max(1, Math.round((item.endTime - item.startTime) / 1000));
 
     return (
       <View style={styles.sessionCard}>
@@ -194,29 +183,12 @@ Generated autonomously by Civic Aegis.`;
           {item.locationLabel || `${item.jurisdictionState} Encounter`}
         </Text>
 
-        {/* Audio Playback Simulator */}
-        <View style={styles.audioSimulationRow}>
-          <TouchableOpacity
-            style={[styles.audioPlayBtn, isPlaying && styles.audioPlayBtnActive]}
-            onPress={() => toggleAudioSimulation(item.id)}
-            activeOpacity={0.8}
-          >
-            {isPlaying ? (
-              <Square size={14} color="#FFFFFF" />
-            ) : (
-              <Play size={14} color="#EF4444" />
-            )}
-            <Text
-              style={[
-                styles.audioPlayBtnText,
-                isPlaying && styles.audioPlayBtnTextActive,
-              ]}
-            >
-              {isPlaying ? 'Playing Audio Stream...' : 'Simulate Audio Playback'}
-            </Text>
-          </TouchableOpacity>
-          <Text style={styles.durationText}>{durationSeconds}s duration</Text>
-        </View>
+        {/* Real Audio Player Component */}
+        <AudioPlayer
+          audioUri={item.audioUri}
+          durationSeconds={durationSeconds}
+          label={item.audioUri ? 'Recorded Stop Audio' : 'Audio Stream Log'}
+        />
 
         {/* Transcript Preview Box */}
         <View style={styles.transcriptBox}>
@@ -426,40 +398,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 8,
-  },
-  audioSimulationRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#080808',
-    borderRadius: 8,
-    padding: 8,
-    marginBottom: 10,
-  },
-  audioPlayBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    minHeight: 38,
-  },
-  audioPlayBtnActive: {
-    backgroundColor: '#EF4444',
-  },
-  audioPlayBtnText: {
-    fontSize: 12,
-    color: '#EF4444',
-    fontWeight: '700',
-    marginLeft: 6,
-  },
-  audioPlayBtnTextActive: {
-    color: '#FFFFFF',
-  },
-  durationText: {
-    fontSize: 12,
-    color: '#A1A1AA',
   },
   transcriptBox: {
     backgroundColor: '#080808',

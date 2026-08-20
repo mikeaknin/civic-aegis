@@ -1,6 +1,6 @@
 /**
- * CivicAegis - Storage Service
- * Persists traffic stop sessions, active recording drafts, emergency contacts, and app preferences.
+ * Civic Aegis - Storage Service
+ * Persists traffic stop sessions, audio recordings, active recording drafts, emergency contacts, and app preferences.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +32,8 @@ export interface StopSession {
   latestAnalysis?: LiveStopAnalysis;
   finalReport?: LawyerRecommendationPayload;
   locationLabel?: string;
+  audioUri?: string;
+  audioDuration?: number;
 }
 
 export interface UserSettings {
