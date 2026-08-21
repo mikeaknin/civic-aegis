@@ -393,30 +393,6 @@ export default function MonitorScreen() {
           </View>
         </View>
 
-        {/* TRIGGER BANNER: "I'M BEING PULLED OVER" */}
-        <TouchableOpacity
-          style={styles.pulledOverBanner}
-          activeOpacity={0.85}
-          onPress={isListening ? handleStopShield : handleStartShield}
-        >
-          <View style={styles.pulledOverLeft}>
-            <View style={styles.pulledOverLogoContainer}>
-              <Image source={APP_LOGO} style={styles.bannerLogoImage} resizeMode="contain" />
-            </View>
-            <View style={styles.pulledOverTextBlock}>
-              <Text style={styles.pulledOverTitle}>
-                {isListening ? 'Stop Civic Aegis Recording' : "I'm Being Pulled Over"}
-              </Text>
-              <Text style={styles.pulledOverSubtitle}>
-                {isListening
-                  ? 'Tap to finalize audio recording, evaluate risk, and save defense brief'
-                  : 'Instantly start microphone recording, speech recognition, and vocal coaching'}
-              </Text>
-            </View>
-          </View>
-          <ChevronRight size={22} color="#EF4444" />
-        </TouchableOpacity>
-
         {/* JURISDICTION SELECTOR */}
         <View style={styles.jurisdictionSection}>
           <ScrollView
@@ -646,7 +622,7 @@ export default function MonitorScreen() {
               <Shield size={18} color="#EF4444" />
             </View>
             <Text style={styles.howItemText}>
-              Tap <Text style={styles.boldWhite}>I'm Being Pulled Over</Text> for instant Civic Aegis Mode
+              Tap <Text style={styles.boldWhite}>Start Civic Aegis</Text> for instant roadside rights protection
             </Text>
           </View>
 
