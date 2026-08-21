@@ -113,13 +113,16 @@ export default function RightsGuideScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerCenteredBox}>
-          <View style={styles.iconCircle}>
-            <BookOpen size={20} color="#EF4444" />
-          </View>
+        <View style={styles.iconCircle}>
+          <BookOpen size={20} color="#EF4444" />
+        </View>
+
+        <View style={styles.headerTextCol}>
           <Text style={styles.headerTitle}>Constitutional Rights</Text>
           <Text style={styles.headerSubtitle}>Verified legal scripts & case precedent</Text>
         </View>
+
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView
@@ -307,18 +310,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 16,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 16,
-  },
-  headerCenteredBox: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   iconCircle: {
     width: 38,
@@ -329,19 +330,30 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+  },
+  headerTextCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: -0.3,
     textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#D4D4D8',
-    marginTop: 2,
+    fontWeight: '500',
+    color: '#9CA3AF',
+    marginTop: 3,
     textAlign: 'center',
+  },
+  headerSpacer: {
+    width: 38,
+    height: 38,
   },
   scrollBody: {
     flex: 1,

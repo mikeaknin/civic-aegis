@@ -255,19 +255,22 @@ Generated autonomously by Civic Aegis.`;
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerCenteredBox}>
-          <View style={styles.iconCircle}>
-            <Clock size={20} color="#EF4444" />
-          </View>
+        <View style={styles.iconCircle}>
+          <Clock size={20} color="#EF4444" />
+        </View>
+
+        <View style={styles.headerTextCol}>
           <Text style={styles.headerTitle}>Stop History</Text>
           <Text style={styles.headerSubtitle}>Saved encounters & legal defense briefs</Text>
         </View>
 
-        {sessions.length > 0 && (
+        {sessions.length > 0 ? (
           <TouchableOpacity style={styles.clearAllBtn} onPress={handleClearAll} activeOpacity={0.8}>
             <Trash2 size={14} color="#EF4444" />
             <Text style={styles.clearAllText}>Clear</Text>
           </TouchableOpacity>
+        ) : (
+          <View style={styles.headerSpacer} />
         )}
       </View>
 
@@ -299,19 +302,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 16,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
     marginBottom: 16,
-  },
-  headerCenteredBox: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   iconCircle: {
     width: 38,
@@ -322,39 +322,48 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+  },
+  headerTextCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '800',
     color: '#FFFFFF',
+    letterSpacing: -0.3,
     textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#D4D4D8',
-    marginTop: 2,
+    fontWeight: '500',
+    color: '#9CA3AF',
+    marginTop: 3,
     textAlign: 'center',
   },
   clearAllBtn: {
-    position: 'absolute',
-    right: 16,
-    top: 14,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
-    minHeight: 32,
+    minHeight: 38,
   },
   clearAllText: {
     fontSize: 11,
     color: '#EF4444',
     fontWeight: '700',
     marginLeft: 4,
+  },
+  headerSpacer: {
+    width: 38,
+    height: 38,
   },
   listContent: {
     padding: 16,
