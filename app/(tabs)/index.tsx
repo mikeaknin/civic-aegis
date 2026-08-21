@@ -378,19 +378,6 @@ export default function MonitorScreen() {
             Real-time rights guidance, saved stop history, AI review, lawyer recommendation, and
             exportable reports.
           </Text>
-
-          {/* Stats Capsule Bar */}
-          <View style={styles.statsCapsuleBar}>
-            <View style={styles.statCapsule}>
-              <Text style={styles.statCapsuleText}>[ {loggedCount} Logged ]</Text>
-            </View>
-            <View style={styles.statCapsule}>
-              <Text style={styles.statCapsuleText}>[ {contactsCount} Contacts ]</Text>
-            </View>
-            <View style={styles.statCapsule}>
-              <Text style={styles.statCapsuleText}>[ {selectedJurisdiction} ]</Text>
-            </View>
-          </View>
         </View>
 
         {/* JURISDICTION SELECTOR */}
@@ -592,9 +579,9 @@ export default function MonitorScreen() {
           >
             <View style={styles.shieldInnerCircle}>
               {isListening ? (
-                <MicOff size={40} color="#FFFFFF" />
+                <MicOff size={44} color="#FFFFFF" />
               ) : (
-                <Mic size={42} color="#FFFFFF" />
+                <Mic size={44} color="#FFFFFF" />
               )}
             </View>
           </TouchableOpacity>
@@ -755,6 +742,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2F1517',
     padding: 16,
+    paddingBottom: 16,
     marginBottom: 12,
   },
   heroTopBadges: {
@@ -815,7 +803,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#CBD5E1',
     lineHeight: 19,
-    marginBottom: 12,
+    marginBottom: 0,
   },
   statsCapsuleBar: {
     flexDirection: 'row',
@@ -1189,9 +1177,9 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   shieldCircleButton: {
-    width: 108,
-    height: 108,
-    borderRadius: 54,
+    width: 130,
+    height: 130,
+    borderRadius: 65,
     backgroundColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1208,9 +1196,9 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   shieldInnerCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 104,
+    height: 104,
+    borderRadius: 52,
     backgroundColor: '#DC2626',
     alignItems: 'center',
     justifyContent: 'center',
