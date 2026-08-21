@@ -26,11 +26,14 @@ import {
   ChevronLeft,
   Sparkles,
   Info,
+  Download,
+  PackageCheck,
 } from 'lucide-react-native';
 
 import { getStopSessionById, StopSession } from '../../services/storage';
 import { LawyerRecommendationPayload } from '../../services/aiService';
 import { AudioPlayer } from '../../components/AudioPlayer';
+import { exportEvidencePackage } from '../../utils/evidenceExporter';
 
 export default function SessionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,6 +42,8 @@ export default function SessionDetailScreen() {
   const [session, setSession] = useState<StopSession | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [exportSuccess, setExportSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     if (id) {
@@ -101,6 +106,37 @@ export default function SessionDetailScreen() {
     minute: '2-digit',
   });
   const durationSeconds = session.audioDuration || Math.max(1, Math.round((session.endTime - session.startTime) / 1000));
+
+  const handleExportEvidence = async () => {
+    if (!session || isExporting) return;
+    setIsExporting(true);
+    try {
+      const briefData = {
+        sessionId: session.id,
+        transcript: session.transcript,
+        transcriptEntries: session.transcriptEntries,
+        threatLevel: session.maxRiskLevel,
+        jurisdiction: session.jurisdictionState,
+        violationsLog: report?.keyFindings || [],
+        suggestedResponse: report?.suggestedResponse || session.latestAnalysis?.suggestedResponse,
+        constitutionalBasis: session.latestAnalysis?.constitutionalRelevance,
+        actionGuidance: session.latestAnalysis?.actionGuidance,
+        reasoning: session.latestAnalysis?.reasoning,
+        finalReport: session.finalReport,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        durationSeconds,
+      };
+
+      await exportEvidencePackage(session.id, briefData, session.audioUri);
+      setExportSuccess(true);
+      setTimeout(() => setExportSuccess(false), 3000);
+    } catch (err) {
+      console.error('Evidence export error:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const generateMarkdownBrief = () => {
     return `# CIVIC AEGIS ROADWAY INCIDENT BRIEF
@@ -176,6 +212,21 @@ ${session.transcript}
 
         <View style={styles.topActions}>
           <TouchableOpacity
+            style={[styles.actionBtn, exportSuccess && styles.actionBtnSuccess]}
+            onPress={handleExportEvidence}
+            activeOpacity={0.8}
+          >
+            {exportSuccess ? (
+              <PackageCheck size={16} color="#10B981" />
+            ) : (
+              <Download size={16} color="#EF4444" />
+            )}
+            <Text style={[styles.actionBtnText, exportSuccess && { color: '#10B981' }]}>
+              {exportSuccess ? 'Exported' : isExporting ? 'Exporting...' : 'Export'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.actionBtn}
             onPress={handleCopyReport}
             activeOpacity={0.8}
@@ -247,6 +298,35 @@ ${session.transcript}
           durationSeconds={durationSeconds}
           label={session.audioUri ? 'Roadside Stop Voice Audio' : 'Audio Encounter Log'}
         />
+
+        {/* Offline Legal Evidence Package Card */}
+        <View style={styles.evidenceCard}>
+          <View style={styles.evidenceHeader}>
+            <Download size={18} color="#EF4444" />
+            <Text style={styles.evidenceTitle}>Offline Legal Evidence Package</Text>
+          </View>
+          <Text style={styles.evidenceDesc}>
+            Export a self-contained JSON evidence artifact containing base64 audio recordings, constitutional defense findings, and timestamped speech logs ready for attorney discovery.
+          </Text>
+          <TouchableOpacity
+            style={[styles.evidenceDownloadBtn, exportSuccess && styles.evidenceDownloadBtnSuccess]}
+            onPress={handleExportEvidence}
+            activeOpacity={0.85}
+          >
+            {exportSuccess ? (
+              <PackageCheck size={18} color="#FFFFFF" />
+            ) : (
+              <Download size={18} color="#FFFFFF" />
+            )}
+            <Text style={styles.evidenceDownloadBtnText}>
+              {exportSuccess
+                ? 'Evidence Package Downloaded'
+                : isExporting
+                ? 'Packaging Audio & Brief...'
+                : 'Download CIVIC_AEGIS_EVIDENCE (.JSON)'}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Lawyer Recommendation Matrix */}
         <View style={styles.lawyerCard}>
@@ -456,6 +536,10 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     minHeight: 38,
   },
+  actionBtnSuccess: {
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+  },
   actionBtnText: {
     fontSize: 13,
     color: '#EF4444',
@@ -469,8 +553,57 @@ const styles = StyleSheet.create({
   shareBtnText: {
     fontSize: 13,
     color: '#FFFFFF',
-    fontWeight: '800',
+    fontWeight: '700',
     marginLeft: 4,
+  },
+  evidenceCard: {
+    backgroundColor: '#141414',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#2F1517',
+    padding: 16,
+    marginBottom: 16,
+  },
+  evidenceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  evidenceTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginLeft: 8,
+  },
+  evidenceDesc: {
+    fontSize: 12,
+    color: '#A1A1AA',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  evidenceDownloadBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EF4444',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  evidenceDownloadBtnSuccess: {
+    backgroundColor: '#10B981',
+    shadowColor: '#10B981',
+  },
+  evidenceDownloadBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    marginLeft: 8,
+    letterSpacing: 0.5,
   },
   scrollBody: {
     flex: 1,

@@ -23,6 +23,8 @@ import {
   Calendar,
   Share2,
   Check,
+  Download,
+  PackageCheck,
 } from 'lucide-react-native';
 
 import {
@@ -32,6 +34,7 @@ import {
   StopSession,
 } from '../../services/storage';
 import { AudioPlayer } from '../../components/AudioPlayer';
+import { exportEvidencePackage } from '../../utils/evidenceExporter';
 
 export default function HistoryScreen() {
   const router = useRouter();
@@ -39,6 +42,7 @@ export default function HistoryScreen() {
   const [sessions, setSessions] = useState<StopSession[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [exportedId, setExportedId] = useState<string | null>(null);
 
   const loadSessions = useCallback(async () => {
     setLoading(true);
@@ -52,6 +56,33 @@ export default function HistoryScreen() {
       loadSessions();
     }, [loadSessions])
   );
+
+  const handleExportEvidencePackage = async (item: StopSession) => {
+    try {
+      const briefData = {
+        sessionId: item.id,
+        transcript: item.transcript,
+        transcriptEntries: item.transcriptEntries,
+        threatLevel: item.maxRiskLevel,
+        jurisdiction: item.jurisdictionState,
+        violationsLog: item.finalReport?.keyFindings || [],
+        suggestedResponse: item.finalReport?.suggestedResponse || item.latestAnalysis?.suggestedResponse,
+        constitutionalBasis: item.latestAnalysis?.constitutionalRelevance,
+        actionGuidance: item.latestAnalysis?.actionGuidance,
+        reasoning: item.latestAnalysis?.reasoning,
+        finalReport: item.finalReport,
+        startTime: item.startTime,
+        endTime: item.endTime,
+        durationSeconds: item.audioDuration || Math.max(1, Math.round((item.endTime - item.startTime) / 1000)),
+      };
+
+      await exportEvidencePackage(item.id, briefData, item.audioUri);
+      setExportedId(item.id);
+      setTimeout(() => setExportedId(null), 3000);
+    } catch (err) {
+      console.error('Error exporting package from history:', err);
+    }
+  };
 
   const handleExportShare = async (item: StopSession) => {
     const dateStr = new Date(item.startTime).toLocaleDateString();
@@ -141,6 +172,7 @@ Generated autonomously by Civic Aegis.`;
     const risk = getRiskColor(item.maxRiskLevel);
     const RiskIcon = risk.Icon;
     const isCopied = copiedId === item.id;
+    const isExported = exportedId === item.id;
 
     const dateStr = new Date(item.startTime).toLocaleDateString([], {
       month: 'short',
@@ -213,20 +245,37 @@ Generated autonomously by Civic Aegis.`;
 
         {/* Bottom Actions Row */}
         <View style={styles.cardBottomRow}>
-          <TouchableOpacity
-            style={styles.exportBriefBtn}
-            onPress={() => handleExportShare(item)}
-            activeOpacity={0.8}
-          >
-            {isCopied ? (
-              <Check size={16} color="#10B981" />
-            ) : (
-              <Share2 size={16} color="#EF4444" />
-            )}
-            <Text style={[styles.exportBriefText, isCopied && { color: '#10B981' }]}>
-              {isCopied ? 'Report Copied' : 'Export Stop Report'}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.leftActionBtns}>
+            <TouchableOpacity
+              style={[styles.exportBriefBtn, isExported && styles.exportBriefBtnSuccess]}
+              onPress={() => handleExportEvidencePackage(item)}
+              activeOpacity={0.8}
+            >
+              {isExported ? (
+                <PackageCheck size={14} color="#10B981" />
+              ) : (
+                <Download size={14} color="#EF4444" />
+              )}
+              <Text style={[styles.exportBriefText, isExported && { color: '#10B981' }]}>
+                {isExported ? 'Downloaded' : 'Evidence .JSON'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.exportBriefBtn}
+              onPress={() => handleExportShare(item)}
+              activeOpacity={0.8}
+            >
+              {isCopied ? (
+                <Check size={14} color="#10B981" />
+              ) : (
+                <Share2 size={14} color="#EF4444" />
+              )}
+              <Text style={[styles.exportBriefText, isCopied && { color: '#10B981' }]}>
+                {isCopied ? 'Copied' : 'Share'}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.rightActionBtns}>
             <TouchableOpacity
@@ -242,7 +291,7 @@ Generated autonomously by Civic Aegis.`;
               onPress={() => router.push(`/session/${item.id}` as any)}
               activeOpacity={0.8}
             >
-              <Text style={styles.viewDetailsText}>Full Brief</Text>
+              <Text style={styles.viewDetailsText}>Brief</Text>
               <ChevronRight size={14} color="#EF4444" />
             </TouchableOpacity>
           </View>
@@ -460,13 +509,27 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     minHeight: 48,
   },
+  leftActionBtns: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   exportBriefBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    backgroundColor: '#141414',
+    borderWidth: 1,
+    borderColor: '#2F1517',
+  },
+  exportBriefBtnSuccess: {
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
   },
   exportBriefText: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#EF4444',
     fontWeight: '700',
     marginLeft: 4,
