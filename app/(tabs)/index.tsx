@@ -322,12 +322,10 @@ export default function MonitorScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Top Header with Safe Area Insets & Official Shield Logo */}
       <View style={styles.header}>
-        <View style={styles.headerBrandRow}>
-          <Image source={APP_LOGO} style={styles.headerLogoImage} resizeMode="contain" />
-          <View style={styles.headerTextCol}>
-            <Text style={styles.headerTitle}>Civic Aegis</Text>
-            <Text style={styles.headerSubtitle}>Autonomous Roadside Civil Rights Agent</Text>
-          </View>
+        <Image source={APP_LOGO} style={styles.headerLogoImage} resizeMode="contain" />
+        <View style={styles.headerTextCol}>
+          <Text style={styles.headerTitle}>Civic Aegis</Text>
+          <Text style={styles.headerSubtitle}>Autonomous Roadside Civil Rights Agent</Text>
         </View>
 
         {/* Top-right Speaker Toggle Button */}
@@ -722,50 +720,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
     minHeight: 56,
   },
-  headerBrandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
   headerLogoImage: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: 8,
-    marginRight: 10,
     borderWidth: 1,
     borderColor: '#2F1517',
   },
   headerTextCol: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   headerTitle: {
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: '900',
     color: '#FFFFFF',
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 12,
     fontWeight: '600',
     color: '#D4D4D8',
     marginTop: 1,
+    textAlign: 'center',
   },
   speakerToggleBtn: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     borderRadius: 10,
     backgroundColor: '#141414',
     borderWidth: 1,
     borderColor: '#2F1517',
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: 8,
   },
   speakerToggleBtnActive: {
     borderColor: '#EF4444',
