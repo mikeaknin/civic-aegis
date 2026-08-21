@@ -7,29 +7,34 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarActiveTintColor: '#EF4444',
+        tabBarInactiveTintColor: '#71717A',
         tabBarStyle: {
+          height: 64,
           backgroundColor: '#0A0A0C',
           borderTopColor: '#1F1F24',
           borderTopWidth: 1,
-          height: 82,
-          paddingTop: 8,
-          paddingBottom: 22,
-          position: 'relative',
+          paddingTop: 6,
+          paddingBottom: 6,
         },
-        tabBarActiveTintColor: '#EF4444',
-        tabBarInactiveTintColor: '#71717A',
         tabBarItemStyle: {
-          justifyContent: 'flex-start',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
           alignItems: 'center',
-          height: 52,
+          paddingVertical: 0,
+          marginVertical: 0,
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
+          marginBottom: 2,
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
-          marginTop: 4,
-        },
-        tabBarIconStyle: {
-          marginTop: 2,
+          marginTop: 0,
+          marginBottom: 0,
+          padding: 0,
         },
       }}
     >
@@ -37,28 +42,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Monitor',
-          tabBarIcon: ({ color }) => <Shield size={21} color={color} />,
+          tabBarIcon: ({ color }) => <Shield size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="rights"
         options={{
           title: 'Rights',
-          tabBarIcon: ({ color }) => <BookOpen size={21} color={color} />,
+          tabBarIcon: ({ color }) => <BookOpen size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="contacts"
         options={{
           title: 'Contacts',
-          tabBarIcon: ({ color }) => <Users size={21} color={color} />,
+          tabBarIcon: ({ color }) => <Users size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color }) => <Clock size={21} color={color} />,
+          tabBarIcon: ({ color }) => <Clock size={20} color={color} />,
         }}
       />
     </Tabs>
