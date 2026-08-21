@@ -169,6 +169,11 @@ ${session.transcript}
           <Text style={styles.backButtonText}>History</Text>
         </TouchableOpacity>
 
+        <View style={styles.topBarTitleCol}>
+          <Text style={styles.topBarTitle}>Attorney Incident Brief</Text>
+          <Text style={styles.topBarSubtitle}>AI Legal Synthesis & Case Evaluation</Text>
+        </View>
+
         <View style={styles.topActions}>
           <TouchableOpacity
             style={styles.actionBtn}
@@ -400,7 +405,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
@@ -416,6 +421,24 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     fontWeight: '700',
     marginLeft: 2,
+  },
+  topBarTitleCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  topBarTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  topBarSubtitle: {
+    fontSize: 11,
+    color: '#D4D4D8',
+    marginTop: 1,
+    textAlign: 'center',
   },
   topActions: {
     flexDirection: 'row',

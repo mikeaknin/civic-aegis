@@ -113,14 +113,12 @@ export default function RightsGuideScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
+        <View style={styles.headerCenteredBox}>
           <View style={styles.iconCircle}>
             <BookOpen size={20} color="#EF4444" />
           </View>
-          <View>
-            <Text style={styles.headerTitle}>Constitutional Rights</Text>
-            <Text style={styles.headerSubtitle}>Verified legal scripts & case precedent</Text>
-          </View>
+          <Text style={styles.headerTitle}>Constitutional Rights</Text>
+          <Text style={styles.headerSubtitle}>Verified legal scripts & case precedent</Text>
         </View>
       </View>
 
@@ -314,11 +312,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
-    minHeight: 56,
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  headerCenteredBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconCircle: {
     width: 38,
@@ -329,17 +329,19 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    marginBottom: 6,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 13,
     color: '#D4D4D8',
-    marginTop: 1,
+    marginTop: 2,
+    textAlign: 'center',
   },
   scrollBody: {
     flex: 1,
@@ -383,6 +385,7 @@ const styles = StyleSheet.create({
   jurisdictionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
   jurisdictionTitle: {
@@ -390,6 +393,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     marginLeft: 6,
+    textAlign: 'center',
   },
   stateChipList: {
     flexDirection: 'row',
@@ -445,6 +449,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 12,
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   card: {
     backgroundColor: '#141414',

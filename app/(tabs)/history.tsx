@@ -255,14 +255,12 @@ Generated autonomously by Civic Aegis.`;
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
+        <View style={styles.headerCenteredBox}>
           <View style={styles.iconCircle}>
             <Clock size={20} color="#EF4444" />
           </View>
-          <View>
-            <Text style={styles.headerTitle}>Stop History</Text>
-            <Text style={styles.headerSubtitle}>Saved encounters & legal defense briefs</Text>
-          </View>
+          <Text style={styles.headerTitle}>Stop History</Text>
+          <Text style={styles.headerSubtitle}>Saved encounters & legal defense briefs</Text>
         </View>
 
         {sessions.length > 0 && (
@@ -301,19 +299,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
-    minHeight: 56,
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    marginBottom: 16,
+  },
+  headerCenteredBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconCircle: {
     width: 38,
@@ -324,31 +322,36 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+    marginBottom: 6,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '900',
+    fontSize: 20,
+    fontWeight: '800',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   headerSubtitle: {
     fontSize: 13,
     color: '#D4D4D8',
-    marginTop: 1,
+    marginTop: 2,
+    textAlign: 'center',
   },
   clearAllBtn: {
+    position: 'absolute',
+    right: 16,
+    top: 14,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
-    minHeight: 36,
+    minHeight: 32,
   },
   clearAllText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#EF4444',
     fontWeight: '700',
     marginLeft: 4,

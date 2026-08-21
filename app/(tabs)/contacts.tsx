@@ -106,14 +106,13 @@ export default function ContactsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerTitleRow}>
-          <View style={styles.iconCircle}>
-            <Users size={20} color="#EF4444" />
-          </View>
-          <View>
-            <Text style={styles.headerTitle}>Emergency Contacts</Text>
-            <Text style={styles.headerSubtitle}>Automated roadside dispatch & legal counsel</Text>
-          </View>
+        <View style={styles.iconCircle}>
+          <Users size={20} color="#EF4444" />
+        </View>
+
+        <View style={styles.headerTextCol}>
+          <Text style={styles.headerTitle}>Emergency Contacts</Text>
+          <Text style={styles.headerSubtitle}>Automated roadside dispatch & legal counsel</Text>
         </View>
 
         <TouchableOpacity
@@ -121,7 +120,7 @@ export default function ContactsScreen() {
           onPress={() => setShowAddForm(!showAddForm)}
           activeOpacity={0.8}
         >
-          <UserPlus size={16} color="#FFFFFF" />
+          <UserPlus size={15} color="#FFFFFF" />
           <Text style={styles.addButtonText}>{showAddForm ? 'Close' : 'Add'}</Text>
         </TouchableOpacity>
       </View>
@@ -294,18 +293,14 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     backgroundColor: '#080808',
     borderBottomWidth: 1,
     borderBottomColor: '#2F1517',
     minHeight: 56,
-  },
-  headerTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   iconCircle: {
     width: 38,
@@ -316,23 +311,31 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 10,
+  },
+  headerTextCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '900',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   headerSubtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#D4D4D8',
     marginTop: 1,
+    textAlign: 'center',
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#EF4444',
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 8,
     minHeight: 38,
@@ -458,6 +461,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 10,
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   emptyContacts: {
     alignItems: 'center',
