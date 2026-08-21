@@ -1,15 +1,29 @@
 /**
  * CivicAegis - AI Service Bridge
- * Connects to Gemini engine and local fallback classifier.
+ * Hardened Gemini 3.7 Flash engine & fallback classifier adapter.
  */
 
 import {
   analyzeWithGemini,
+  evaluateAmbientSpeechWithGemini,
   generateLocalFallbackAnalysis,
+  generateDeterministicHardenedResponse,
   generateStructuredLegalReport,
   GeminiLiveAnalysis,
   StructuredLegalBrief,
+  CivicAegisHardenedAssessment,
+  ThreatLevel,
+  DEFAULT_CIVIC_AEGIS_RESPONSE,
+  CIVIC_AEGIS_RESPONSE_SCHEMA,
 } from './gemini';
+
+export type { ThreatLevel, CivicAegisHardenedAssessment };
+export {
+  evaluateAmbientSpeechWithGemini,
+  generateDeterministicHardenedResponse,
+  DEFAULT_CIVIC_AEGIS_RESPONSE,
+  CIVIC_AEGIS_RESPONSE_SCHEMA,
+};
 
 export interface LawyerRecommendationPayload {
   shouldContactLawyer: boolean;

@@ -1,16 +1,30 @@
 /**
- * Civic Aegis - Google Gemini API Bridge
+ * Civic Aegis - Google Gemini API Integration Service
+ * Hardened Structured Output & Regression Defense for Gemini 3.7 Flash
+ * 
  * Features:
- *  - Real-time Hybrid AI reasoning (gemini-3.7-flash + Offline Rule Engine)
- *  - Fail-safe timeout wrapper (3.5s timeout with zero-latency local fallback)
- *  - EXPO_PUBLIC_GEMINI_API_KEY support
- *  - Structured Attorney Hand-Off Defense Brief generator (gemini-3.7-flash)
+ *  - Target Model: gemini-3.7-flash with responseMimeType: "application/json"
+ *  - Strict responseSchema with explicit propertyOrdering to prevent decoding loops & token exhaustion
+ *  - Configured temperature: 0.2 and maxOutputTokens: 1024
+ *  - System instruction enforcing the Civic Aegis Legal Agent role
+ *  - Defensive try...catch handling 400, 429, timeouts, and JSON decode failures
+ *  - Deterministic client-side fallbacks matching exact schema structure
  */
 
 import {
   LEGAL_DISCLAIMER,
   JURISDICTION_STATE_DATABASE,
 } from '../constants/legalSafety';
+
+export type ThreatLevel = 'LOW' | 'ELEVATED' | 'CRITICAL';
+
+export interface CivicAegisHardenedAssessment {
+  threatLevel: ThreatLevel;
+  activeRights: string[];
+  vocalScript: string;
+  jurisdictionStatute: string;
+  triggerEmergencyDispatch: boolean;
+}
 
 export interface GeminiLiveAnalysis {
   suggestedResponse: string;
@@ -35,18 +49,95 @@ export interface StructuredLegalBrief {
 }
 
 /**
- * Fallback Offline Keyword Classifier
- * Executes synchronously in < 1ms with 0 network dependency.
+ * Deterministic Safe Default Response Object
+ * Enforces exact schema structure when API/JSON parsing fails.
  */
-export function generateLocalFallbackAnalysis(
+export const DEFAULT_CIVIC_AEGIS_RESPONSE: CivicAegisHardenedAssessment = {
+  threatLevel: 'LOW',
+  activeRights: ['4th Amendment', '5th Amendment'],
+  vocalScript: 'Officer, I am complying calmly and exercising my right to remain silent.',
+  jurisdictionStatute: 'U.S. Const. amend. IV, V; Terry v. Ohio, 392 U.S. 1 (1968)',
+  triggerEmergencyDispatch: false,
+};
+
+/**
+ * Strict JSON Schema with explicit propertyOrdering to avoid Gemini 3.7 Flash decoding loop regressions
+ */
+export const CIVIC_AEGIS_RESPONSE_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    threatLevel: {
+      type: 'STRING',
+      enum: ['LOW', 'ELEVATED', 'CRITICAL'],
+      description: 'Calculated threat level for driver safety and legal vulnerability.',
+    },
+    activeRights: {
+      type: 'ARRAY',
+      items: {
+        type: 'STRING',
+      },
+      description: 'Applicable constitutional rights (e.g., 4th Amendment, 5th Amendment).',
+    },
+    vocalScript: {
+      type: 'STRING',
+      description: 'Immediate non-escalatory statement for the driver to say aloud (Max 20 words).',
+    },
+    jurisdictionStatute: {
+      type: 'STRING',
+      description: 'State or federal statute or landmark case law reference.',
+    },
+    triggerEmergencyDispatch: {
+      type: 'BOOLEAN',
+      description: 'Whether critical conditions require triggering emergency dispatch alert.',
+    },
+  },
+  required: [
+    'threatLevel',
+    'activeRights',
+    'vocalScript',
+    'jurisdictionStatute',
+    'triggerEmergencyDispatch',
+  ],
+  propertyOrdering: [
+    'threatLevel',
+    'activeRights',
+    'vocalScript',
+    'jurisdictionStatute',
+    'triggerEmergencyDispatch',
+  ],
+};
+
+/**
+ * System Instructions for Civic Aegis Legal Agent
+ */
+export const CIVIC_AEGIS_SYSTEM_INSTRUCTION = {
+  parts: [
+    {
+      text: `You are the Civic Aegis Legal Agent.
+Your role is to evaluate raw ambient speech fragments from roadside police encounters against active state and federal legal statutes.
+Provide immediate, non-escalatory, constitutional defense guidance.
+INSTRUCTIONS:
+1. Always prioritize peaceful de-escalation and driver safety. Never advocate physical resistance.
+2. Provide a concise vocal script of at most 20 words that the driver can read aloud calmly.
+3. Forbid repeating numeric indices or redundant string keys in your response.
+4. Output must strictly conform to the declared responseSchema.`,
+    },
+  ],
+};
+
+/**
+ * Deterministic Local Fallback Engine
+ * Generates an instant, zero-latency schema-compliant response based on keyword analysis.
+ */
+export function generateDeterministicHardenedResponse(
   transcript: string,
   jurisdictionState: string = 'General U.S.'
-): GeminiLiveAnalysis {
+): CivicAegisHardenedAssessment {
   const text = transcript.toLowerCase();
   const stateCode = jurisdictionState.length === 2 ? jurisdictionState : 'CA';
   const stateData = JURISDICTION_STATE_DATABASE[stateCode] || JURISDICTION_STATE_DATABASE['CA'];
 
-  // HIGH RISK: Search requests, opening trunk/glove box, odor probing, weapon queries
+  // CRITICAL / SEARCH / PROBE: Search requests, opening trunk/glove box, odor, weapons
   if (
     text.includes('search') ||
     text.includes('look inside') ||
@@ -61,19 +152,15 @@ export function generateLocalFallbackAnalysis(
     text.includes('illegal')
   ) {
     return {
-      suggestedResponse:
-        'Officer, I do not consent to any searches of my vehicle, my belongings, or my person.',
-      constitutionalBasis: '4th Amendment (Protection Against Unreasonable Searches)',
-      riskLevel: 'HIGH',
-      actionInstruction: 'Keep both hands visible on steering wheel. Do not physically resist if searched.',
-      intent: 'Search Inquiry / Vehicle Inspection Probe',
-      reasoning:
-        'The officer is requesting or probing for voluntary consent to search. Explicit verbal refusal protects your 4th Amendment rights for the court record.',
-      timestamp: Date.now(),
+      threatLevel: 'CRITICAL',
+      activeRights: ['4th Amendment', 'Article I Search Protections'],
+      vocalScript: 'Officer, I do not consent to any searches of my vehicle, person, or belongings.',
+      jurisdictionStatute: `${stateData.stateName} Search & Seizure Stat. / U.S. Const. amend. IV`,
+      triggerEmergencyDispatch: false,
     };
   }
 
-  // HIGH RISK: Compulsory vehicle exit orders (Pennsylvania v. Mimms / Maryland v. Wilson)
+  // CRITICAL: Compulsory vehicle exit orders (Pennsylvania v. Mimms)
   if (
     text.includes('step out') ||
     text.includes('get out of the car') ||
@@ -82,19 +169,15 @@ export function generateLocalFallbackAnalysis(
     text.includes('out of the car')
   ) {
     return {
-      suggestedResponse:
-        'I am complying with your order to exit the vehicle, but I do not consent to any searches.',
-      constitutionalBasis: 'Pennsylvania v. Mimms (1977) & Maryland v. Wilson (1997)',
-      riskLevel: 'HIGH',
-      actionInstruction: 'Comply smoothly. Keep hands empty and visible. Close car door behind you.',
-      intent: 'Compulsory Vehicle Exit Order',
-      reasoning:
-        'Under Pennsylvania v. Mimms, police may lawfully order occupants out during a traffic stop. Non-compliance can lead to arrest for obstruction.',
-      timestamp: Date.now(),
+      threatLevel: 'CRITICAL',
+      activeRights: ['4th Amendment', 'Pennsylvania v. Mimms (1977)'],
+      vocalScript: 'I am complying with your exit order, but I do not consent to any searches.',
+      jurisdictionStatute: 'Pennsylvania v. Mimms, 434 U.S. 106 (1977)',
+      triggerEmergencyDispatch: false,
     };
   }
 
-  // MODERATE RISK: Field sobriety probing / Questions about alcohol or destination
+  // ELEVATED: Field sobriety probing / Interrogation / Alcohol questions
   if (
     text.includes('field sobriety') ||
     text.includes('how much have you had') ||
@@ -105,19 +188,15 @@ export function generateLocalFallbackAnalysis(
     text.includes('do you know how fast')
   ) {
     return {
-      suggestedResponse:
-        'Officer, with all respect, I am choosing to exercise my Fifth Amendment right to remain silent.',
-      constitutionalBasis: '5th Amendment (Salinas v. Texas & Miranda v. Arizona)',
-      riskLevel: 'MODERATE',
-      actionInstruction: 'Provide required documentation, but politely decline exploratory questions.',
-      intent: 'Exploratory Interrogation / Sobriety Probe',
-      reasoning:
-        'Investigatory questions seek voluntary admissions of guilt. In most states, roadside physical field sobriety tests are voluntary.',
-      timestamp: Date.now(),
+      threatLevel: 'ELEVATED',
+      activeRights: ['5th Amendment', 'Right to Remain Silent'],
+      vocalScript: 'Officer, with all respect, I am exercising my Fifth Amendment right to remain silent.',
+      jurisdictionStatute: 'U.S. Const. amend. V / Salinas v. Texas, 570 U.S. 178 (2013)',
+      triggerEmergencyDispatch: false,
     };
   }
 
-  // MODERATE RISK: Speeding citations / Tickets
+  // ELEVATED: Speeding citation / Ticket signing
   if (
     text.includes('ticket') ||
     text.includes('citation') ||
@@ -125,19 +204,15 @@ export function generateLocalFallbackAnalysis(
     text.includes('court date')
   ) {
     return {
-      suggestedResponse:
-        'Understood, Officer. I am signing this as a receipt and promise to appear, not an admission of guilt.',
-      constitutionalBasis: `${stateData.stateName} Vehicle Code § Statutory Citation Procedures`,
-      riskLevel: 'MODERATE',
-      actionInstruction: 'Sign the ticket calmly. Signing is merely a promise to appear.',
-      intent: 'Citation Issuance',
-      reasoning:
-        'Refusing to sign a traffic citation is an arrestable misdemeanor in most jurisdictions. Contest the citation in court, not roadside.',
-      timestamp: Date.now(),
+      threatLevel: 'ELEVATED',
+      activeRights: ['Due Process', 'Statutory Appearance Receipt'],
+      vocalScript: 'Understood Officer. I am signing this only as a receipt and promise to appear.',
+      jurisdictionStatute: `${stateData.stateName} Vehicle Code § Statutory Citation Procedures`,
+      triggerEmergencyDispatch: false,
     };
   }
 
-  // ROUTINE: Mandatory identification / registration checks
+  // LOW: Mandatory ID / Registration check
   if (
     text.includes('license') ||
     text.includes('registration') ||
@@ -146,39 +221,47 @@ export function generateLocalFallbackAnalysis(
     text.includes('tail light')
   ) {
     return {
-      suggestedResponse:
-        'Officer, my documents are in the glove compartment. I am reaching for them now with your permission.',
-      constitutionalBasis: `${stateData.stateName} Mandatory Driver Identification Statute`,
-      riskLevel: 'ROUTINE',
-      actionInstruction: 'Verbally narrate your hand movements before reaching into any compartment.',
-      intent: 'Mandatory Driver Verification',
-      reasoning: `In ${stateData.stateName}, operating drivers are legally obligated to display driver's license, registration, and proof of insurance upon lawful demand.`,
-      timestamp: Date.now(),
+      threatLevel: 'LOW',
+      activeRights: ['Mandatory Driver Verification'],
+      vocalScript: 'Officer, my documents are in the vehicle. I am reaching for them now calmly.',
+      jurisdictionStatute: `${stateData.stateName} Mandatory Driver Identification Statute`,
+      triggerEmergencyDispatch: false,
     };
   }
 
-  // Default Routine State
+  // DEFAULT / LOW
   return {
-    suggestedResponse: 'Good day, Officer. How can I help you today?',
-    constitutionalBasis: 'General De-escalation & Constitutional Awareness',
-    riskLevel: 'ROUTINE',
-    actionInstruction: 'Keep hands on steering wheel at 10 and 2. Roll window halfway down.',
-    intent: 'Standard Traffic Inquiry',
-    reasoning: 'Interaction is currently routine. Maintain professional, calm posture.',
-    timestamp: Date.now(),
+    threatLevel: 'LOW',
+    activeRights: ['4th Amendment', '5th Amendment'],
+    vocalScript: 'Good day Officer. How can I help you today?',
+    jurisdictionStatute: 'U.S. Const. amend. IV, V; Terry v. Ohio, 392 U.S. 1 (1968)',
+    triggerEmergencyDispatch: false,
   };
 }
 
 /**
- * Call Google Gemini gemini-3.7-flash API for real-time speech categorization
- * with automatic 3.5s timeout and seamless offline fallback.
+ * Legacy Adapter for Local Fallback Analysis
  */
-export async function analyzeWithGemini(
+export function generateLocalFallbackAnalysis(
+  transcript: string,
+  jurisdictionState: string = 'General U.S.'
+): GeminiLiveAnalysis {
+  const hardened = generateDeterministicHardenedResponse(transcript, jurisdictionState);
+  return mapHardenedToLegacyAnalysis(hardened);
+}
+
+/**
+ * Hardened Gemini 3.7 Flash Evaluation Service
+ * Evaluates raw ambient speech fragments against active state legal statutes
+ * with full resilience against 400/429 and JSON decoding loop regressions.
+ */
+export async function evaluateAmbientSpeechWithGemini(
   transcript: string,
   jurisdictionState: string = 'General U.S.',
   customApiKey?: string
-): Promise<GeminiLiveAnalysis> {
-  const fallback = generateLocalFallbackAnalysis(transcript, jurisdictionState);
+): Promise<CivicAegisHardenedAssessment> {
+  const fallback = generateDeterministicHardenedResponse(transcript, jurisdictionState);
+
   const apiKey =
     customApiKey?.trim() ||
     process.env.EXPO_PUBLIC_GEMINI_API_KEY ||
@@ -192,26 +275,14 @@ export async function analyzeWithGemini(
   const timeoutId = setTimeout(() => controller?.abort(), 3500);
 
   try {
-    const prompt = `You are Civic Aegis, an autonomous real-time civil rights and de-escalation engine for traffic stops.
-Analyze the live roadside conversation transcript in the context of ${jurisdictionState} law:
+    const prompt = `Evaluate the following ambient traffic stop dialogue under ${jurisdictionState} statutory and constitutional law:
 
-LIVE TRANSCRIPT:
+RAW AMBIENT TRANSCRIPT:
 """
 ${transcript}
 """
 
-SAFETY DIRECTIVES:
-1. NEVER instruct physical resistance or aggression.
-2. Emphasize calm, polite assertion of constitutional rights (4th, 5th, 6th Amendments).
-3. Return STRICT JSON adhering to this schema:
-{
-  "suggestedResponse": "string (concise 1-2 sentence polite phrase for the driver to say aloud)",
-  "constitutionalBasis": "string (e.g. '4th Amendment', 'Pennsylvania v. Mimms', or State Code)",
-  "riskLevel": "ROUTINE" | "MODERATE" | "HIGH",
-  "actionInstruction": "string (physical safety reminder like 'Keep hands on wheel')",
-  "intent": "string (officer intent category)",
-  "reasoning": "string (1-2 sentences on legal reasoning)"
-}`;
+Evaluate threat level, active rights, concise vocal script (max 20 words), relevant jurisdiction statute, and whether emergency dispatch is warranted.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${apiKey}`,
@@ -220,9 +291,12 @@ SAFETY DIRECTIVES:
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
+          systemInstruction: CIVIC_AEGIS_SYSTEM_INSTRUCTION,
           generationConfig: {
             responseMimeType: 'application/json',
+            responseSchema: CIVIC_AEGIS_RESPONSE_SCHEMA,
             temperature: 0.2,
+            maxOutputTokens: 1024,
           },
         }),
         signal: controller?.signal,
@@ -231,36 +305,164 @@ SAFETY DIRECTIVES:
 
     clearTimeout(timeoutId);
 
+    // Gracefully handle HTTP 400, 429, or 500 status errors
     if (!response.ok) {
+      console.warn(`[Gemini API] Request failed with HTTP status: ${response.status}`);
       return fallback;
     }
 
     const data = await response.json();
     const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) return fallback;
 
+    if (!rawText || typeof rawText !== 'string') {
+      return fallback;
+    }
+
+    // Defensive JSON parse
     const parsed = JSON.parse(rawText);
+
+    // Validate and sanitize parsed schema properties
+    const validThreatLevels: ThreatLevel[] = ['LOW', 'ELEVATED', 'CRITICAL'];
+    const threatLevel: ThreatLevel = validThreatLevels.includes(parsed.threatLevel)
+      ? parsed.threatLevel
+      : fallback.threatLevel;
+
+    const activeRights: string[] =
+      Array.isArray(parsed.activeRights) && parsed.activeRights.length > 0
+        ? parsed.activeRights.filter((r: unknown) => typeof r === 'string' && r.trim().length > 0)
+        : fallback.activeRights;
+
+    const vocalScript: string =
+      typeof parsed.vocalScript === 'string' && parsed.vocalScript.trim().length > 0
+        ? parsed.vocalScript.trim()
+        : fallback.vocalScript;
+
+    const jurisdictionStatute: string =
+      typeof parsed.jurisdictionStatute === 'string' && parsed.jurisdictionStatute.trim().length > 0
+        ? parsed.jurisdictionStatute.trim()
+        : fallback.jurisdictionStatute;
+
+    const triggerEmergencyDispatch: boolean =
+      typeof parsed.triggerEmergencyDispatch === 'boolean'
+        ? parsed.triggerEmergencyDispatch
+        : fallback.triggerEmergencyDispatch;
+
     return {
-      suggestedResponse: parsed.suggestedResponse || fallback.suggestedResponse,
-      constitutionalBasis: parsed.constitutionalBasis || fallback.constitutionalBasis,
-      riskLevel:
-        parsed.riskLevel === 'HIGH' || parsed.riskLevel === 'MODERATE'
-          ? parsed.riskLevel
-          : 'ROUTINE',
-      actionInstruction: parsed.actionInstruction || fallback.actionInstruction,
-      intent: parsed.intent || fallback.intent,
-      reasoning: parsed.reasoning || fallback.reasoning,
-      timestamp: Date.now(),
+      threatLevel,
+      activeRights: activeRights.length > 0 ? activeRights : fallback.activeRights,
+      vocalScript,
+      jurisdictionStatute,
+      triggerEmergencyDispatch,
     };
-  } catch (err) {
+  } catch (error) {
     clearTimeout(timeoutId);
+    console.warn('[Gemini Service] Defensive catch triggered:', error);
     return fallback;
   }
 }
 
 /**
+ * Maps CivicAegisHardenedAssessment into GeminiLiveAnalysis structure
+ */
+function mapHardenedToLegacyAnalysis(hardened: CivicAegisHardenedAssessment): GeminiLiveAnalysis {
+  const legacyRisk: 'ROUTINE' | 'MODERATE' | 'HIGH' =
+    hardened.threatLevel === 'CRITICAL'
+      ? 'HIGH'
+      : hardened.threatLevel === 'ELEVATED'
+      ? 'MODERATE'
+      : 'ROUTINE';
+
+  const actionInstruction =
+    hardened.threatLevel === 'CRITICAL'
+      ? 'Keep both hands visible on steering wheel at 10 and 2. Do not physically resist.'
+      : hardened.threatLevel === 'ELEVATED'
+      ? 'Remain polite and composed. Provide required documents without answering investigatory questions.'
+      : 'Maintain a calm and respectful posture. Roll window halfway down.';
+
+  return {
+    suggestedResponse: hardened.vocalScript,
+    constitutionalBasis: `${hardened.activeRights.join(', ')} • ${hardened.jurisdictionStatute}`,
+    riskLevel: legacyRisk,
+    actionInstruction,
+    intent: `${hardened.threatLevel} Priority Encounter Assessment`,
+    reasoning: `Identified active rights: ${hardened.activeRights.join(', ')} under ${hardened.jurisdictionStatute}.`,
+    timestamp: Date.now(),
+  };
+}
+
+/**
+ * Main Analysis Bridge for Real-time Speech Categorization
+ */
+export async function analyzeWithGemini(
+  transcript: string,
+  jurisdictionState: string = 'General U.S.',
+  customApiKey?: string
+): Promise<GeminiLiveAnalysis> {
+  const hardened = await evaluateAmbientSpeechWithGemini(
+    transcript,
+    jurisdictionState,
+    customApiKey
+  );
+  return mapHardenedToLegacyAnalysis(hardened);
+}
+
+/**
+ * Structured Attorney Hand-Off Defense Brief Schema
+ */
+const ATTORNEY_BRIEF_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    shouldContactLawyer: {
+      type: 'BOOLEAN',
+      description: 'Whether post-stop legal counsel is recommended.',
+    },
+    lawyerType: {
+      type: 'STRING',
+      enum: ['Traffic Infraction Defense', 'Civil Rights Counsel', 'Criminal Defense Attorney'],
+      description: 'Recommended legal specialty.',
+    },
+    urgency: {
+      type: 'STRING',
+      enum: ['High', 'Medium', 'Low'],
+      description: 'Urgency level for attorney consultation.',
+    },
+    riskLevel: {
+      type: 'STRING',
+      enum: ['ROUTINE', 'MODERATE', 'HIGH'],
+      description: 'Overall risk assessment of the stop.',
+    },
+    keyFindings: {
+      type: 'ARRAY',
+      items: { type: 'STRING' },
+      description: 'Synthesized legal and procedural findings.',
+    },
+    recommendedDefenseSteps: {
+      type: 'ARRAY',
+      items: { type: 'STRING' },
+      description: 'Actionable legal defense steps.',
+    },
+  },
+  required: [
+    'shouldContactLawyer',
+    'lawyerType',
+    'urgency',
+    'riskLevel',
+    'keyFindings',
+    'recommendedDefenseSteps',
+  ],
+  propertyOrdering: [
+    'shouldContactLawyer',
+    'lawyerType',
+    'urgency',
+    'riskLevel',
+    'keyFindings',
+    'recommendedDefenseSteps',
+  ],
+};
+
+/**
  * Generate Structured Attorney Hand-Off Defense Brief using gemini-3.7-flash
- * with zero-latency local fallback.
+ * with zero-latency local fallback and defensive error handling.
  */
 export async function generateStructuredLegalReport(
   transcript: string,
@@ -336,22 +538,14 @@ export async function generateStructuredLegalReport(
     const timeoutId = setTimeout(() => controller?.abort(), 5000);
 
     try {
-      const prompt = `You are Civic Aegis, synthesizing an attorney defense hand-off brief following a police traffic stop in ${jurisdictionState}.
+      const prompt = `You are the Civic Aegis Legal Agent synthesizing an attorney defense hand-off brief following a police traffic stop in ${jurisdictionState}.
 
 INTERACTION TRANSCRIPT:
 """
 ${transcript}
 """
 
-Synthesize legal findings and generate a defense assessment. Return STRICT JSON with the following schema:
-{
-  "shouldContactLawyer": boolean,
-  "lawyerType": "Traffic Infraction Defense" | "Civil Rights Counsel" | "Criminal Defense Attorney",
-  "urgency": "High" | "Medium" | "Low",
-  "riskLevel": "ROUTINE" | "MODERATE" | "HIGH",
-  "keyFindings": ["string", "string"],
-  "recommendedDefenseSteps": ["string", "string"]
-}`;
+Synthesize legal findings and generate a defense assessment. Forbid repeating keys in JSON.`;
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${apiKey}`,
@@ -360,9 +554,12 @@ Synthesize legal findings and generate a defense assessment. Return STRICT JSON 
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: CIVIC_AEGIS_SYSTEM_INSTRUCTION,
             generationConfig: {
               responseMimeType: 'application/json',
+              responseSchema: ATTORNEY_BRIEF_SCHEMA,
               temperature: 0.2,
+              maxOutputTokens: 1024,
             },
           }),
           signal: controller?.signal,
@@ -401,7 +598,7 @@ Synthesize legal findings and generate a defense assessment. Return STRICT JSON 
       }
     } catch (e) {
       clearTimeout(timeoutId);
-      // Seamlessly fall back to pre-baked local synthesis
+      // Seamlessly fall back to deterministic local synthesis
     }
   }
 
