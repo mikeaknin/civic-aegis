@@ -126,7 +126,7 @@ export default function RightsGuideScreen() {
 
       <ScrollView
         style={styles.scrollBody}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 + insets.bottom }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 150 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Core Safety Directive Banner */}
@@ -352,47 +352,48 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#EF4444',
-    padding: 14,
+    padding: 16,
     marginBottom: 16,
   },
   alertHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   alertTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '800',
     color: '#EF4444',
     marginLeft: 6,
+    letterSpacing: 0.3,
   },
   alertText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#E4E4E7',
-    lineHeight: 19,
+    lineHeight: 22,
   },
   jurisdictionCard: {
     backgroundColor: '#141414',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: '#2F1517',
-    padding: 14,
+    padding: 16,
     marginBottom: 20,
   },
   jurisdictionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 12,
   },
   jurisdictionTitle: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: '#FFFFFF',
     marginLeft: 6,
   },
   stateChipList: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   stateChip: {
     paddingHorizontal: 14,
@@ -411,7 +412,7 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
   },
   stateChipText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#A1A1AA',
     fontWeight: '600',
   },
@@ -422,21 +423,21 @@ const styles = StyleSheet.create({
   stateDetailBox: {
     backgroundColor: '#080808',
     borderRadius: 8,
-    padding: 12,
+    padding: 14,
   },
   stateMetaRow: {
-    marginBottom: 6,
+    marginBottom: 10,
   },
   stateMetaLabel: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '700',
-    color: '#A1A1AA',
+    color: '#F8FAFC',
   },
   stateMetaValue: {
-    fontSize: 13,
-    color: '#FFFFFF',
-    marginTop: 2,
-    lineHeight: 17,
+    fontSize: 14,
+    color: '#CBD5E1',
+    marginTop: 3,
+    lineHeight: 20,
   },
   sectionHeaderTitle: {
     fontSize: 15,
@@ -465,12 +466,12 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   amendmentTag: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '800',
     color: '#EF4444',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 2,
+    marginBottom: 3,
   },
   cardTitle: {
     fontSize: 16,
@@ -478,17 +479,17 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   shortRuleText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#D4D4D8',
-    lineHeight: 18,
+    lineHeight: 20,
     marginBottom: 12,
   },
   scriptContainer: {
     backgroundColor: '#080808',
     borderRadius: 10,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: '#EF4444',
-    padding: 12,
+    padding: 14,
     marginBottom: 10,
   },
   scriptHeader: {
@@ -504,10 +505,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   scriptText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '700',
     color: '#FFFFFF',
-    lineHeight: 21,
+    lineHeight: 24,
     fontStyle: 'italic',
   },
   expandedDetails: {
@@ -517,9 +518,9 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   detailedExplanation: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#E4E4E7',
-    lineHeight: 19,
+    lineHeight: 20,
     marginBottom: 14,
   },
   dosDontsGrid: {
@@ -531,7 +532,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(16, 185, 129, 0.25)',
-    padding: 10,
+    padding: 12,
   },
   dosHeader: {
     flexDirection: 'row',
@@ -539,15 +540,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   dosTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
     color: '#10B981',
     marginLeft: 6,
   },
   doItemText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#F4F4F5',
-    lineHeight: 17,
+    lineHeight: 18,
     marginBottom: 4,
   },
   dontsColumn: {
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.25)',
-    padding: 10,
+    padding: 12,
   },
   dontsHeader: {
     flexDirection: 'row',
@@ -563,15 +564,15 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   dontsTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '800',
     color: '#EF4444',
     marginLeft: 6,
   },
   dontItemText: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#F4F4F5',
-    lineHeight: 17,
+    lineHeight: 18,
     marginBottom: 4,
   },
   faqCard: {
@@ -611,9 +612,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   faqAnswerText: {
-    fontSize: 13,
-    color: '#E4E4E7',
-    lineHeight: 19,
+    fontSize: 14,
+    color: '#CBD5E1',
+    lineHeight: 20,
     marginBottom: 8,
   },
   citationRow: {

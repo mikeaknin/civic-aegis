@@ -128,7 +128,7 @@ export default function ContactsScreen() {
 
       <ScrollView
         style={styles.scrollBody}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 + insets.bottom }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 150 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Quick SMS Broadcast Simulation Card */}

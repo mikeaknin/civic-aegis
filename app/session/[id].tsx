@@ -194,7 +194,7 @@ ${session.transcript}
 
       <ScrollView
         style={styles.scrollBody}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 + insets.bottom }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 150 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Incident Summary Header */}
@@ -636,9 +636,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   bulletText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#E4E4E7',
-    lineHeight: 19,
+    lineHeight: 22,
     flex: 1,
   },
   transcriptCard: {
@@ -690,14 +690,14 @@ const styles = StyleSheet.create({
     color: '#71717A',
   },
   entryBody: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#F4F4F5',
-    lineHeight: 18,
+    lineHeight: 22,
   },
   rawTranscriptText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#E4E4E7',
-    lineHeight: 19,
+    lineHeight: 22,
   },
   disclaimerBox: {
     flexDirection: 'row',

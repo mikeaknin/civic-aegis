@@ -196,7 +196,7 @@ Generated autonomously by Civic Aegis.`;
             <FileText size={12} color="#71717A" />
             <Text style={styles.transcriptHeaderLabel}>INCIDENT TRANSCRIPT</Text>
           </View>
-          <Text style={styles.transcriptPreview} numberOfLines={3}>
+          <Text style={styles.transcriptPreview} numberOfLines={4}>
             {item.transcript || 'No verbal audio recorded during stop.'}
           </Text>
         </View>
@@ -287,7 +287,7 @@ Generated autonomously by Civic Aegis.`;
           data={sessions}
           keyExtractor={(item) => item.id}
           renderItem={renderSessionItem}
-          contentContainerStyle={[styles.listContent, { paddingBottom: 110 + insets.bottom }]}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 150 + insets.bottom }]}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   transcriptBox: {
     backgroundColor: '#080808',
     borderRadius: 8,
-    padding: 10,
+    padding: 12,
     marginBottom: 10,
     borderLeftWidth: 3,
     borderLeftColor: '#EF4444',
@@ -413,16 +413,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   transcriptHeaderLabel: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '800',
     color: '#A1A1AA',
     marginLeft: 4,
     letterSpacing: 0.5,
   },
   transcriptPreview: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#E4E4E7',
-    lineHeight: 18,
+    lineHeight: 22,
   },
   lawyerBadge: {
     flexDirection: 'row',

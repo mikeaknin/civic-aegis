@@ -1,36 +1,32 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Shield, BookOpen, Users, Clock } from 'lucide-react-native';
-import { Platform } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
-  const insets = useSafeAreaInsets();
-  const bottomInset = Platform.OS === 'web' ? 16 : Math.max(16, insets.bottom);
-  const tabHeight = Platform.OS === 'web' ? 72 : 56 + bottomInset;
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#080808',
-          borderTopColor: '#2F1517',
+          backgroundColor: '#0F0F12',
+          borderTopColor: '#1E1E24',
           borderTopWidth: 1.5,
-          height: tabHeight,
-          paddingBottom: bottomInset,
+          height: 88,
+          paddingBottom: 28,
           paddingTop: 8,
           position: 'relative',
         },
         tabBarActiveTintColor: '#EF4444',
         tabBarInactiveTintColor: '#71717A',
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-          marginTop: 2,
+          fontSize: 12,
+          fontWeight: '600',
+          marginBottom: 4,
+        },
+        tabBarIconStyle: {
+          marginTop: 4,
         },
         tabBarItemStyle: {
-          minHeight: 48,
           justifyContent: 'center',
           alignItems: 'center',
         },

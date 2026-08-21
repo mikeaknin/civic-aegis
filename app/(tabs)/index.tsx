@@ -347,7 +347,7 @@ export default function MonitorScreen() {
 
       <ScrollView
         style={styles.scrollBody}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 + insets.bottom }]}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 150 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {/* HERO CARD: LIVE RIGHTS COACH */}
@@ -853,7 +853,7 @@ const styles = StyleSheet.create({
   statCapsule: {
     backgroundColor: '#080808',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#2F1517',
@@ -949,9 +949,9 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   jurisdictionSubtext: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#CBD5E1',
-    lineHeight: 18,
+    lineHeight: 20,
     paddingHorizontal: 4,
   },
   activeHudSection: {
@@ -1289,9 +1289,9 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   howItemText: {
-    fontSize: 14,
-    color: '#D4D4D8',
-    lineHeight: 20,
+    fontSize: 15,
+    color: '#CBD5E1',
+    lineHeight: 22,
     flex: 1,
   },
   boldWhite: {
