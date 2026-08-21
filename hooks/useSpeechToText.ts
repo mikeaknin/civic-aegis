@@ -127,21 +127,27 @@ export function useSpeechToText(
           };
 
           recognition.onerror = (event: any) => {
-            console.warn('Speech recognition status/error:', event.error);
-            // Non-fatal errors: auto-continue
-            if (event.error === 'no-speech' || event.error === 'audio-capture' || event.error === 'aborted') {
+            const errType = event.error || 'unknown';
+            console.warn('Speech recognition status/error:', errType);
+            // Non-fatal errors: auto-continue without breaking state
+            if (
+              errType === 'no-speech' ||
+              errType === 'audio-capture' ||
+              errType === 'network' ||
+              errType === 'aborted'
+            ) {
               // Ignore and allow onend to restart if still active
               return;
             }
-            if (event.error === 'not-allowed') {
-              setError('Microphone access denied. Please allow microphone permissions in Safari/browser settings.');
+            if (errType === 'not-allowed' || errType === 'service-not-allowed') {
+              setError('Microphone access denied. Please allow microphone permissions in browser settings.');
             } else {
-              setError(`Speech API notice: ${event.error}`);
+              setError(`Speech API notice: ${errType}`);
             }
           };
 
           recognition.onend = () => {
-            // Auto-restart if user still has shield session active (handles mobile Safari silence timeouts)
+            // Auto-restart if user still has shield session active (handles browser silence timeouts)
             if (isListeningRef.current) {
               if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
               restartTimeoutRef.current = setTimeout(() => {
